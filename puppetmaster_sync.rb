@@ -1,7 +1,18 @@
+###########################################
+# Rack-compliant applicationt that will:
+###########################################
+#
+# * Listen for incoming Github push requests from our Puppet repo
+# * Validate the request is ours by checking the X-Hub-Signature header and decoding it
+#   using the locally provided secret (PUPPETMASTER_SYNC_SECRET environment variable)
+# * Update the branch on the puppetmaster provided in the webhook if it is present
+#   in the YAML file branch mappings you provide (PUPPETMASTER_SYNC_CONFIG_FILE variable)
+
 require 'rubygems'
 require 'logger'
 require 'sinatra'
 require 'json'
+
 
 class PuppetmasterSync < Sinatra::Base
 
@@ -28,8 +39,8 @@ class PuppetmasterSync < Sinatra::Base
   end
 
   # Become puppet, cd to puppet checkout directory, check out the branch, update it
-  def update_puppetmaster_directory(branch, directory)
-    system %{su - puppet bash -c "cd #{directory} && git checkout #{directory} && git pull origin #{directory}"}
+  def update_puppetmaster_directory(branch, directory, user)
+    system %{su - #{user} bash -c "cd #{directory} && git checkout #{directory} && git pull origin #{directory}"}
   end
 
   # https://developer.github.com/webhooks/#payloads
@@ -85,8 +96,9 @@ class PuppetmasterSync < Sinatra::Base
       halt 404, "Not watching for #{branch} updates"
     end
 
-    update_puppetmaster_directory(branch, @config["branches"][branch])
-    @logger.info("updated #{branch}")
+    update_puppetmaster_directory(branch, @config["branches"][branch], @config["user"])
+    name, email = gh_webhook_response["pusher"]["name"], gh_webhook_response["pusher"]["email"]
+    @logger.info("updated #{branch} on behalf of #{name} (#{email})")
 
     true
   end

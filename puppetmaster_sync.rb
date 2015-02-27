@@ -19,8 +19,14 @@ class PuppetmasterSync < Sinatra::Base
   def initialize
     @logger = ::Logger.new($stderr)
     @branch_mappings = {}
-    @secret = nil
+
+    unless ENV.has_key? "PUPPETMASTER_SYNC_SECRET"
+      raise RuntimeError.new("ENV missing 'PUPPETMASTER_SYNC_SECRET' key")
+    end
+
+    @github_webhook_secret = ENV["PUPPETMASTER_SYNC_SECRET"]
     @config = parse_config_file
+
     super
   end
 
@@ -63,10 +69,8 @@ class PuppetmasterSync < Sinatra::Base
 
     # From https://developer.github.com/webhooks/securing/
     request.body.rewind
-    signature = "sha1=" + OpenSSL::HMAC.hexdigest(
-      OpenSSL::Digest.new("sha1"),
-      ENV["PUPPETMASTER_SYNC_SECRET"], request.body.read
-    )
+    signature = "sha1=" + \
+      OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha1"), @github_webhook_secret, request.body.read)
     unless Rack::Utils.secure_compare(signature, headers["X-Hub-Signature"])
       halt 401, "Github push request - signature / secret mismatch: skipping"
     end

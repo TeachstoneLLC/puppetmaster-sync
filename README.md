@@ -37,3 +37,10 @@ branches:
   develop: /etc/puppet/develop
   master:  /etc/puppet/master
 ```
+
+# Running
+
+```
+bundle install --path vendor/bundle --binstubs
+bin/puma -w 1  # or any other rack compliant server (but puma is included in Gemfile)
+```

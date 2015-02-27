@@ -17,6 +17,7 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 
 * Working puppetmaster set up using multiple environments (https://docs.puppetlabs.com/puppet/latest/reference/environments\_configuring.html)
 * Git / puppet repo set up with web hook configured to send pushes to this process
+* Puppet user is used to run puppet
 * User set up on puppet master with SSH key for Github (deploy key) that allows it to do git pulls without human intervention
 * Modern version of ruby (version 2.0 or higher)
 * Webhook set up with secret configured on Github (put same on the client)

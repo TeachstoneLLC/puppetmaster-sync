@@ -13,32 +13,25 @@ require 'logger'
 require 'sinatra'
 require 'json'
 
-
 class PuppetmasterSync < Sinatra::Base
 
   def initialize
     @logger = ::Logger.new($stderr)
     @branch_mappings = {}
-
-    unless ENV.has_key? "PUPPETMASTER_SYNC_SECRET"
-      raise RuntimeError.new("ENV missing 'PUPPETMASTER_SYNC_SECRET' key")
-    end
-
-    @github_webhook_secret = ENV["PUPPETMASTER_SYNC_SECRET"]
-    @config = parse_config_file
-
     super
   end
 
   def parse_config_file
     unless ENV.has_key? "PUPPETMASTER_SYNC_CONFIG_FILE"
-      raise RuntimeError.new("ENV missing 'PUPPETMASTER_SYNC_CONFIG_FILE' key")
+      @logger.error("ENV missing 'PUPPETMASTER_SYNC_CONFIG_FILE' key")
+      halt 401
     end
 
     config_file = ENV["PUPPETMASTER_SYNC_CONFIG_FILE"]
 
     unless File.readable? config_file
-      raise RuntimeError.new("Configuration file #{config_file} is not readable")
+      @logger.error("Configuration file #{config_file} is not readable")
+      halt 401
     end
 
     YAML.load(config_file)
@@ -60,6 +53,16 @@ class PuppetmasterSync < Sinatra::Base
   end
 
   before do
+
+    unless ENV.has_key? "PUPPETMASTER_SYNC_SECRET"
+      @logger.error("ENV missing 'PUPPETMASTER_SYNC_SECRET' key")
+      halt 401
+    end
+
+    GITHUB_WEBHOOK_SECRET = ENV["PUPPETMASTER_SYNC_SECRET"]
+
+    CONFIG = parse_config_file
+
     if !headers.has_key? "X-Hub-Signature"
       @logger.error("Received request with no authorization (X-Hub-Signature header missing) - skipping")
       halt 401
@@ -70,7 +73,7 @@ class PuppetmasterSync < Sinatra::Base
     # From https://developer.github.com/webhooks/securing/
     request.body.rewind
     signature = "sha1=" + \
-      OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha1"), @github_webhook_secret, request.body.read)
+      OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha1"), GITHUB_WEBHOOK_SECRET, request.body.read)
     unless Rack::Utils.secure_compare(signature, headers["X-Hub-Signature"])
       halt 401, "Github push request - signature / secret mismatch: skipping"
     end
@@ -95,12 +98,12 @@ class PuppetmasterSync < Sinatra::Base
 
     branch = gh_webhook_response["ref"].split("/")[-1]
 
-    unless @config["branches"].has_key? branch
+    unless CONFIG["branches"].has_key? branch
       @logger.error("Received Github push service hook request for branch we don't monitor #{branch}: skipping")
       halt 404, "Not watching for #{branch} updates"
     end
 
-    update_puppetmaster_directory(branch, @config["branches"][branch], @config["user"])
+    update_puppetmaster_directory(branch, CONFIG["branches"][branch], CONFIG["user"])
     name, email = gh_webhook_response["pusher"]["name"], gh_webhook_response["pusher"]["email"]
     @logger.info("updated #{branch} on behalf of #{name} (#{email})")
 

@@ -37,7 +37,4 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 branches:
   develop: /etc/puppet/develop
   master:  /etc/puppet/master
-user:
-  puppet
 ```
-

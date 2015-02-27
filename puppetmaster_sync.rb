@@ -48,8 +48,8 @@ class PuppetmasterSync < Sinatra::Base
   end
 
   # Become puppet, cd to puppet checkout directory, check out the branch, update it
-  def update_puppetmaster_directory(branch, directory, user)
-    system %{su - #{user} bash -c "cd #{directory} && git checkout #{directory} && git pull origin #{directory}"}
+  def update_puppetmaster_directory(branch, directory)
+    system %{cd #{directory} && git checkout #{branch} && git pull origin #{branch}}
   end
 
   # https://developer.github.com/webhooks/#payloads
@@ -117,7 +117,7 @@ class PuppetmasterSync < Sinatra::Base
       halt 404, "Not watching for #{branch} updates"
     end
 
-    update_puppetmaster_directory(branch, config["branches"][branch], config["user"])
+    update_puppetmaster_directory(branch, config["branches"][branch])
     name, email = gh_webhook_response["pusher"]["name"], gh_webhook_response["pusher"]["email"]
     @logger.info("updated #{branch} on behalf of #{name} (#{email})")
 

@@ -1,0 +1,3 @@
+branches:
+  develop: /etc/puppet/develop
+  master:  /etc/puppet/master

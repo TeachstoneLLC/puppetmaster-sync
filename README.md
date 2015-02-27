@@ -25,6 +25,8 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 
 # Configuration
 
+These parameters are set as environment variables
+
 * Ensure PUPPETMASTER\_SYNC\_SECRET is set to the Github secret set for the Github webservice hook
 * Ensure PUPPETMASTER\_SYNC\_CONFIG\_FILE is set to the fully qualified path of your YAML configuration file.
 

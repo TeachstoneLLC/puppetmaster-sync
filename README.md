@@ -30,11 +30,14 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 
 ## Configuration file
 
-Should have one key - branches - a hash, with the branch name as key and the directory as value. Example:
+* branches - a hash, with the branch name as key and the directory as value. Example:
+* user - user to run the puppet pull as
 
 ```
 branches:
   develop: /etc/puppet/develop
   master:  /etc/puppet/master
+user:
+  puppet
 ```
 

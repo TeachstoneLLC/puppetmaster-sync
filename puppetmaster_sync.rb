@@ -45,8 +45,7 @@ class PuppetmasterSync < Sinatra::Base
     YAML.load(IO.read(config_file))
   end
 
-  # Become puppet, cd to puppet checkout directory, check out the branch, update it
-  def update_puppetmaster_directory(branch, directory)
+  def update_puppetmaster_checkout_for(branch, directory)
     system %{cd #{directory} && git checkout #{branch} && git pull origin #{branch}}
   end
 
@@ -58,8 +57,8 @@ class PuppetmasterSync < Sinatra::Base
 
   # https://developer.github.com/webhooks/#payloads
   #
-  # Github sends our configured secret as an HMAC hex digest of the payload, using the # hook’s secret 
-  # as the key (if configured).
+  # Github sends our configured secret as an HMAC hex digest of the payload, using the hook’s secret
+  # as the key.
   #
   # Test payload available in spec/support/sample_push.json
 
@@ -92,10 +91,8 @@ class PuppetmasterSync < Sinatra::Base
     request.body.rewind
   end
 
-  # Happens when a push is done to the puppet-config repo
+  # Happens when a push is done to the puppet configuration repository
   post '/' do
-
-    config = PuppetmasterSync.config
 
     webhook_response_json = request.body.read
 
@@ -111,16 +108,19 @@ class PuppetmasterSync < Sinatra::Base
       halt 400
     end
 
-    branch = gh_webhook_response["ref"].split("/")[-1]
+    branch_name = gh_webhook_response["ref"].split("/")[-1]
 
-    unless config["branches"].has_key? branch
-      logger.error("Received Github push service hook request for branch we don't monitor #{branch}: skipping")
-      halt 404, "Not watching for #{branch} updates"
+    unless PuppetmasterSync.config["branches"].has_key? branch_name
+      logger.error("Received Github push service hook request for branch we don't monitor (#{branch_name}): skipping")
+      halt 200, "Not watching for #{branch_name} updates"
     end
 
-    update_puppetmaster_directory(branch, config["branches"][branch])
+    branch_dir = PuppetmasterSync.config["branches"][branch_name]
+
+    update_puppetmaster_checkout_for(branch_name, branch_dir)
+
     name, email = gh_webhook_response["pusher"]["name"], gh_webhook_response["pusher"]["email"]
-    logger.info("updated #{branch} on behalf of #{name} (#{email})")
+    logger.info("updated #{branch_name} on behalf of #{name} (#{email})")
 
     true
   end

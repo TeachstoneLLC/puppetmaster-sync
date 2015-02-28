@@ -47,7 +47,11 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 * Configure webhook to use a secret (https://developer.github.com/webhooks/securing/)
 * Disable SSL validation if your receiving side uses a self-signed SSL certificate or you do not use SSL (you should use SSL though!)
 * Add the URL you configured on the Puppetmaster to the webhook
-* Test the endpoint by pushing to a branch you've configured your application for. If the whole process works, you will see log messages from puppetmaster_sync stating that a branch was updated on behalf of the user who triggered the push (in stderr.log if using puma).
+* Test the endpoint by pushing to a branch you've configured your application for. If the whole process works, you will see log messages from puppetmaster_sync stating that a branch was updated on behalf of the user who triggered the push (in stderr.log if using puma). Example:
+
+```
+[2015-02-27T22:13:31.157490 #19023]  INFO -- : updated master on behalf of a_user (a_user@example.com)
+```
 
 ## Configuration file
 

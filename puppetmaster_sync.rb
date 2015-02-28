@@ -46,7 +46,7 @@ class PuppetmasterSync < Sinatra::Base
   end
 
   def update_puppetmaster_checkout_for(branch, directory)
-    system %{cd #{directory} && git checkout #{branch} && git pull origin #{branch}}
+    system %{cd '#{directory}' && git checkout '#{branch}' && git pull origin '#{branch}'}
   end
 
   configure do

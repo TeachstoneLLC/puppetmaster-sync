@@ -15,7 +15,6 @@ require 'json'
 require 'pry'
 
 class PuppetmasterSync < Sinatra::Base
-
   def initialize
     @branch_mappings = {}
     @@config = nil
@@ -30,7 +29,7 @@ class PuppetmasterSync < Sinatra::Base
     @@config
   end
 
-  def parse_config_file
+  def read_config_file
     unless ENV.has_key? "PUPPETMASTER_SYNC_CONFIG_FILE"
       logger.error("ENV missing 'PUPPETMASTER_SYNC_CONFIG_FILE' key")
       halt 401
@@ -51,39 +50,41 @@ class PuppetmasterSync < Sinatra::Base
     system %{cd #{directory} && git checkout #{branch} && git pull origin #{branch}}
   end
 
-  # https://developer.github.com/webhooks/#payloads
-  #
-  # Github sends our configured secret as an HMAC hex digest of the payload, using the # hook’s secret 
-  # as the key (if configured).
-
   configure do
     set :app_file, __FILE__
     set :dump_errors, true
     enable :logging
   end
 
-  before do
+  # https://developer.github.com/webhooks/#payloads
+  #
+  # Github sends our configured secret as an HMAC hex digest of the payload, using the # hook’s secret 
+  # as the key (if configured).
+  #
+  # Test payload available in spec/support/sample_push.json
 
+  before do
     unless ENV.has_key? "PUPPETMASTER_SYNC_SECRET"
       logger.error("ENV missing 'PUPPETMASTER_SYNC_SECRET' key")
       halt 401
     end
 
-    GITHUB_WEBHOOK_SECRET = ENV["PUPPETMASTER_SYNC_SECRET"]
-
-    PuppetmasterSync.config = parse_config_file
+    PuppetmasterSync.config = read_config_file
 
     if !request.env.has_key? "HTTP_X_HUB_SIGNATURE"
       logger.error("Received request with no authorization (X-Hub-Signature header missing) - skipping")
       halt 401
     end
 
-    logger.info("Processing Github delivery ID #{request.env['HTTP_X_HUB_SIGNATURE']}")
+    logger.info(
+      "github[#{request.env['HTTP_X_GITHUB_DELIVERY']}]: processing #{request.env['X_GITHUB_EVENT']} " +
+      request.env["X_HUB_SIGNATURE"]
+    )
 
     # From https://developer.github.com/webhooks/securing/
     request.body.rewind
     signature = "sha1=" + \
-      OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha1"), GITHUB_WEBHOOK_SECRET, request.body.read)
+      OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha1"), env["PUPPETMASTER_SYNC_SECRET"], request.body.read)
     unless Rack::Utils.secure_compare(signature, request.env["HTTP_X_HUB_SIGNATURE"])
       halt 401, "Github push request - signature / secret mismatch: skipping"
     end
@@ -125,9 +126,9 @@ class PuppetmasterSync < Sinatra::Base
   end
 
   get '/' do
-    logger.error("oops")
+    logger.info("ping")
+    "PONG"
   end
 
   run! if $0 == __FILE__
-
 end

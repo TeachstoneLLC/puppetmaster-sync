@@ -17,7 +17,7 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 * If the secret received matches the configured secret (see https://developer.github.com/v3/repos/hooks/#create-a-hook) then we accept the webhook request - otherwise we drop it
 * If the branch for the push hook matches a branch configured in the configuration file:
   * cd to the directory specified for that configuration
-  * Run ```git pull`` to update the branch locally
+  * Run ```git pull``` to update the branch locally
 
 # Pre-requisites
 

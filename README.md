@@ -3,7 +3,7 @@
 Syncs Puppet branches on a puppet master when a push is received for a branch the program is configured to update
 
 ```
-            _______________                    _____________________
+            _______________     push webhook   _____________________
   O   git   |             |     __________     |                    |     ____________________
  _|_  ----> | puppet repo | --> | POST / | --> | puppetmaster_sync  | --> | cd dir; git pull |
   |   push  | on Github   |     ----------     |                    |     --------------------

@@ -77,14 +77,14 @@ class PuppetmasterSync < Sinatra::Base
     end
 
     logger.info(
-      "github[#{request.env['HTTP_X_GITHUB_DELIVERY']}]: processing #{request.env['X_GITHUB_EVENT']} " +
-      request.env["X_HUB_SIGNATURE"]
+      "github[#{request.env['HTTP_X_GITHUB_DELIVERY']}]: processing #{request.env['HTTP_X_GITHUB_EVENT']} " +
+      request.env["HTTP_X_HUB_SIGNATURE"]
     )
 
     # From https://developer.github.com/webhooks/securing/
     request.body.rewind
     signature = "sha1=" + \
-      OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha1"), env["PUPPETMASTER_SYNC_SECRET"], request.body.read)
+      OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha1"), ENV["PUPPETMASTER_SYNC_SECRET"], request.body.read)
     unless Rack::Utils.secure_compare(signature, request.env["HTTP_X_HUB_SIGNATURE"])
       halt 401, "Github push request - signature / secret mismatch: skipping"
     end

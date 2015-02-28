@@ -125,9 +125,8 @@ class PuppetmasterSync < Sinatra::Base
     true
   end
 
-  get '/' do
-    logger.info("ping")
-    "PONG"
+  get '/ping' do
+    "pong"
   end
 
   run! if $0 == __FILE__

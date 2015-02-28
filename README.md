@@ -2,6 +2,13 @@
 
 Syncs Puppet branches on a puppet master when a push is received for a branch the program is configured to update
 
+```
+            _______________                    _____________________
+  O   git   |             |     __________     |                    |     ____________________
+ _|_  ----> | puppet repo | --> | POST / | --> | puppetmaster_sync  | --> | cd dir; git pull |
+  |   push  | on Github   |     ----------     |                    |     --------------------
+ / \        ---------------                    ----------------------
+```
 Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deployment-on-ec2.html
 
 # Functionality
@@ -14,11 +21,10 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 
 # Pre-requisites
 
-* Working puppetmaster set up using multiple environments (https://docs.puppetlabs.com/puppet/latest/reference/environments\_configuring.html)
+* Working puppetmaster set up using multiple environments (https://docs.puppetlabs.com/puppet/latest/reference/environments_configuring.html)
 * Git / puppet repo set up with web hook configured to send pushes to this process
-* Puppet user is used to run puppet
-* User set up on puppet master with SSH key for Github (deploy key) that allows it to do git pulls without human intervention
-* App set up to run as the user that is allowed to do a git pull on the server from Github
+* User this app runs as has filesystem permissions enabled to allow it to run ```git pull```
+* User this app runs as is set up on puppet master with an SSH deploy key for Github that allows it to do git pulls without human intervention or passphrase
 * Modern version of ruby (version 2.0 or higher)
 * Webhook set up with secret configured on Github (put same on the client)
   * Disable SSL verification as we use self-signed certs

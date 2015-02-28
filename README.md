@@ -7,7 +7,7 @@ Syncs Puppet branches on a puppet master when a push is received for a branch th
   O   git   |             |     __________     |                    |     ____________________
  _|_  ----> | puppet repo | --> | POST / | --> | puppetmaster_sync  | --> | cd dir; git pull |
   |   push  | on Github   |     ----------     |                    |     --------------------
- / \        ---------------     on Github
+ / \        ---------------     on Github      ----------------------
 ```
 Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deployment-on-ec2.html
 

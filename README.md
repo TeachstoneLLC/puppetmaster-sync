@@ -10,7 +10,6 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 * If the secret received matches the configured secret (see https://developer.github.com/v3/repos/hooks/#create-a-hook) then we accept the webhook request - otherwise we drop it
 * If the branch for the push hook matches a branch configured in the configuration file:
   * cd to the directory specified for that configuration
-  * become the user specified in the configuration
   * Run ```git pull`` to update the branch locally
 
 # Pre-requisites
@@ -19,11 +18,14 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 * Git / puppet repo set up with web hook configured to send pushes to this process
 * Puppet user is used to run puppet
 * User set up on puppet master with SSH key for Github (deploy key) that allows it to do git pulls without human intervention
+* App set up to run as the user that is allowed to do a git pull on the server from Github
 * Modern version of ruby (version 2.0 or higher)
 * Webhook set up with secret configured on Github (put same on the client)
   * Disable SSL verification as we use self-signed certs
 
 # Configuration
+
+These parameters are set as environment variables
 
 * Ensure PUPPETMASTER\_SYNC\_SECRET is set to the Github secret set for the Github webservice hook
 * Ensure PUPPETMASTER\_SYNC\_CONFIG\_FILE is set to the fully qualified path of your YAML configuration file.
@@ -31,10 +33,16 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 ## Configuration file
 
 * branches - a hash, with the branch name as key and the directory as value. Example:
-* user - user to run the puppet pull as
 
 ```
 branches:
   develop: /etc/puppet/develop
   master:  /etc/puppet/master
+```
+
+# Running
+
+```
+bundle install --path vendor/bundle --binstubs
+bin/puma -w 1  # or any other rack compliant server (but puma is included in Gemfile)
 ```

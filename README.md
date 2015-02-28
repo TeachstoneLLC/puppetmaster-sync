@@ -31,10 +31,23 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 
 # Configuration
 
-These parameters are set as environment variables
+## Puppetmaster set up
 
-* Ensure PUPPETMASTER\_SYNC\_SECRET is set to the Github secret set for the Github webservice hook
-* Ensure PUPPETMASTER\_SYNC\_CONFIG\_FILE is set to the fully qualified path of your YAML configuration file.
+* Configure the Rack application using your ruby application of choice (passenger, puma, thin, etc). We use Nginx with puma and set up puma to listen on a Unix domain socket, then configure Nginx to proxy requests to the application using that domain socket (http://stackoverflow.com/questions/17450672/how-to-start-puma-with-unix-socket)
+* Open access to your puppetmaster from the Github API server address blocks (important to not allow the *world* to access this endpoint) - https://help.github.com/articles/what-ip-addresses-does-github-use-that-i-should-whitelist/
+* Create the YAML configuration file and put it somewhere on the server
+  (see spec/support/sample_config.yaml for an example configuration file)
+* Ensure the environment variable PUPPETMASTER\_SYNC\_SECRET is set to the Github secret set for the Github webservice hook in the environment the puppetmaster_sync application runs in.
+* Ensure the environment variable PUPPETMASTER\_SYNC\_CONFIG\_FILE is set to the fully qualified path of your YAML configuration file for the puppetmaster_sync application.
+* Start the application - you will see a stdout.log and stderr.log under the log directory of the application (when using puma) if the application started successfully.
+
+## Github setup
+
+* Add a webhook for push events for the Github repo you wish to update from (https://developer.github.com/webhooks/#events)
+* Configure webhook to use a secret (https://developer.github.com/webhooks/securing/)
+* Disable SSL validation if your receiving side uses a self-signed SSL certificate or you do not use SSL (you should use SSL though!)
+* Add the URL you configured on the Puppetmaster to the webhook
+* Test the endpoint by pushing to a branch you've configured your application for.
 
 ## Configuration file
 
@@ -46,7 +59,7 @@ branches:
   master:  /etc/puppet/master
 ```
 
-# Running
+# Running in development mode
 
 ```
 bundle install --path vendor/bundle --binstubs

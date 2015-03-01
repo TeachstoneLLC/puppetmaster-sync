@@ -13,7 +13,7 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 
 # Functionality
 
-* Listens for incoming Github push web hooks
+* Listens for incoming Github push web hooks POST requests - https://developer.github.com/webhooks/
 * If the Github secret received matches the configured secret (see https://developer.github.com/v3/repos/hooks/#create-a-hook) then we accept the webhook request - otherwise we drop it
 * If the branch for the push hook matches a branch configured in the configuration file:
   * cd to the directory specified for that configuration

@@ -16,7 +16,6 @@ require 'pry'
 
 class PuppetmasterSync < Sinatra::Base
   def initialize
-    @branch_mappings = {}
     @@config = nil
     super
   end

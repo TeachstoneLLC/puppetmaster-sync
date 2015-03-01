@@ -15,10 +15,8 @@ require 'json'
 require 'pry'
 
 class PuppetmasterSync < Sinatra::Base
-  def initialize
-    @@config = nil
-    super
-  end
+
+  @@config = nil
 
   def PuppetmasterSync.config=(new_config)
     @@config = new_config

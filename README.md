@@ -36,7 +36,7 @@ Server code based on http://gilesbowkett.blogspot.com/2012/06/heroku-style-deplo
 * Configure the Rack application using your ruby application server of choice (passenger, puma, thin, etc). We use Nginx with puma and set up puma to listen on a Unix domain socket, then configure Nginx to proxy requests to the application using that domain socket (http://stackoverflow.com/questions/17450672/how-to-start-puma-with-unix-socket)
 * Open access to your puppetmaster from the Github API server address blocks (important to not allow the *world* to access this endpoint) - https://help.github.com/articles/what-ip-addresses-does-github-use-that-i-should-whitelist/
 * Create the YAML configuration file and put it somewhere on the server
-  (see spec/support/sample_config.yaml for an example configuration file)
+  (see spec/support/sample_config.yml for an example configuration file)
 * Ensure the environment variable PUPPETMASTER\_SYNC\_SECRET is set to the Github secret set for the Github webservice hook in the environment the puppetmaster_sync application runs in.
 * Ensure the environment variable PUPPETMASTER\_SYNC\_CONFIG\_FILE is set to the fully qualified path of your YAML configuration file for the puppetmaster_sync application.
 * Start the application - you will see a stdout.log and stderr.log under the log directory of the application (when using puma) if the application started successfully.
